@@ -1,0 +1,48 @@
+#!/bin/bash
+set -e
+
+echo "🚀 Starting M'Eye application..."
+
+# Wait for database to be ready
+echo "⏳ Waiting for PostgreSQL..."
+until pg_isready -h db -U "${POSTGRES_USER:-meye_user}"; do
+    sleep 2
+done
+
+echo "✅ Database is ready"
+
+# Wait for Redis to be ready
+echo "⏳ Waiting for Redis..."
+until redis-cli -h redis ping | grep -q PONG; do
+    sleep 2
+done
+
+echo "✅ Redis is ready"
+
+# Run database migrations (if not already done by init script)
+echo "📦 Running database migrations..."
+# Migrations are run automatically on container init via /docker-entrypoint-initdb.d
+
+# Start the API server in background
+echo "🌐 Starting API server on port 3000..."
+meye-api &
+API_PID=$!
+
+# Start the SMTP gateway in background
+echo "📧 Starting SMTP gateway on port 2525..."
+meye-smtp &
+SMTP_PID=$!
+
+# Start the worker in background
+echo "⚙️ Starting background worker..."
+meye-worker &
+WORKER_PID=$!
+
+# Trap signals to clean up child processes
+trap "kill $API_PID $SMTP_PID $WORKER_PID 2>/dev/null || true" EXIT
+
+# Wait for any process to exit
+wait -n
+
+# Exit with status of first process to exit
+exit $?

@@ -1,0 +1,16 @@
+[package]
+name = "meye-db"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Database layer for M'Eye"
+
+[dependencies]
+meye-models = { path = "../models" }
+sqlx.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+chrono.workspace = true

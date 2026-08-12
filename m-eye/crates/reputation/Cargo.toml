@@ -1,0 +1,12 @@
+[package]
+name = "meye-reputation"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Reputation engine for M'Eye"
+
+[dependencies]
+meye-models = { path = "../models" }
+serde.workspace = true
+thiserror.workspace = true

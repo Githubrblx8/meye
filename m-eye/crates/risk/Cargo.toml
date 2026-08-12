@@ -1,0 +1,12 @@
+[package]
+name = "meye-risk"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Risk engine for M'Eye"
+
+[dependencies]
+meye-models = { path = "../models" }
+serde.workspace = true
+thiserror.workspace = true

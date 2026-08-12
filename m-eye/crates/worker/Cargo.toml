@@ -1,0 +1,21 @@
+[package]
+name = "meye-worker"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Background worker for M'Eye"
+
+[[bin]]
+name = "meye-worker"
+path = "src/main.rs"
+
+[dependencies]
+meye-models = { path = "../models" }
+meye-db = { path = "../db" }
+tokio.workspace = true
+sqlx.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+thiserror.workspace = true
+chrono.workspace = true

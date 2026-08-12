@@ -1,82 +1,70 @@
-version: "3.8"
+version: '3.8'
 
 services:
-  # PostgreSQL Database - Source of Truth
-  postgres:
+  db:
     image: postgres:15-alpine
-    container_name: m-eye-postgres
+    container_name: meye-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-m_eye}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-m_eye_secure_password_change_me}
-      POSTGRES_DB: ${POSTGRES_DB:-m_eye}
+      POSTGRES_USER: ${POSTGRES_USER:-meye_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ChangeMe_StrongPass!}
+      POSTGRES_DB: ${POSTGRES_DB:-meye_db}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
       - ./migrations:/docker-entrypoint-initdb.d:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-m_eye} -d ${POSTGRES_DB:-m_eye}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
     networks:
-      - m-eye-network
-
-  # Redis - Cache and Job Queue
-  redis:
-    image: redis:7-alpine
-    container_name: m-eye-redis
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
+      - meye-net
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - m-eye-network
-
-  # Backend API + Worker (Rust)
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: m-eye-backend
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-m_eye}:${POSTGRES_PASSWORD:-m_eye_secure_password_change_me}@postgres:5432/${POSTGRES_DB:-m_eye}
-      REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET:-change_this_secret_key_in_production_minimum_32_chars}
-      JWT_ISSUER: m-eye-api
-      JWT_LIFETIME_SECS: 3600
-      API_HOST: 0.0.0.0
-      API_PORT: 8000
-      SMTP_PORT: 2525
-      RUST_LOG: info
-    ports:
-      - "${API_PORT:-8000}:8000"
-      - "${SMTP_PORT:-2525}:2525"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8000/api/v1/health"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-meye_user}"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: meye-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redisdata:/data
     networks:
-      - m-eye-network
+      - meye-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: meye-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-meye_user}:${POSTGRES_PASSWORD:-ChangeMe_StrongPass!}@db:5432/${POSTGRES_DB:-meye_db}
+      REDIS_URL: redis://redis:6379
+      RUST_LOG: info
+      JWT_SECRET: ${JWT_SECRET:-ChangeThisToARandomSecretKeyAtLeast32CharsLong!}
+      JWT_ISSUER: ${JWT_ISSUER:-m-eye-local}
+    ports:
+      - "3000:3000"
+      - "2525:2525"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - meye-net
+    command: ["./meye-start"]
 
 volumes:
-  postgres_data:
-    driver: local
-  redis_data:
-    driver: local
+  pgdata:
+  redisdata:
 
 networks:
-  m-eye-network:
+  meye-net:
     driver: bridge

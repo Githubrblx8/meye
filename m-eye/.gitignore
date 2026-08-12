@@ -1,0 +1,47 @@
+# Rust
+/target/
+**/target/
+*.rs.bk
+Cargo.lock
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+
+# Build output for frontend
+frontend/dist/
+frontend/node_modules/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Test coverage
+*.gcda
+*.gcno
+coverage/
+
+# Docker volumes (local)
+pgdata/
+redisdata/
