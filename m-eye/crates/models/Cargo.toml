@@ -1,0 +1,16 @@
+[package]
+name = "meye-models"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Shared data models for M'Eye"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+sqlx.workspace = true
+validator.workspace = true
+thiserror.workspace = true

@@ -1,228 +1,208 @@
-# M'Eye
+# 🛡️ M'Eye - Plateforme Open Source de Sécurité Email
 
-**Open Source Email Security and Reputation Platform**
+**M'Eye** est une plateforme open source de sécurité et de réputation des emails permettant aux particuliers, entreprises et chercheurs en cybersécurité de contrôler les emails entrants et sortants.
 
-[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
-[![Rust](https://img.shields.io/badge/Rust-1.75+-orange.svg)](https://www.rust-lang.org/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![Rust](https://img.shields.io/badge/Rust-1.75-orange.svg)](https://www.rust-lang.org)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com)
 
-M'Eye is an open-source email security and reputation platform that allows individuals, organizations, administrators, and cybersecurity researchers to monitor incoming and outgoing emails through an SMTP gateway.
+## 🎯 Fonctionnalités
 
-## 🎯 Features
+- **📧 SMTP Gateway** - Analyse des emails entrants/sortants
+- **🔐 Authentication Checks** - SPF, DKIM, DMARC, ARC
+- **🧠 Reputation Engine** - Scoring basé sur des standards industriels
+- **⚠️ Risk Engine** - Décision ALLOW/WATCH/BLOCK/QUARANTINE
+- **👥 Community Reports** - Signalements communautaires avec preuves
+- **🔎 Threat Intelligence** - Intégration de sources externes (Phase 3)
+- **📊 Dashboard** - Interface web moderne (Phase 2)
 
-- **Email Reputation System**: Determine if an email, domain, or IP is SAFE, UNKNOWN, WATCH, BLOCKED, or COMPROMISED
-- **SMTP Gateway**: Analyze inbound and outbound emails
-- **Authentication Checks**: SPF, DKIM, DMARC validation
-- **Risk Engine**: Explainable risk scoring
-- **Community Reporting**: Users can report suspicious emails with evidence
-- **RBAC**: Role-based access control (Member, Trusted Reporter, Researcher, Moderator, Admin)
-- **Audit Trail**: Complete history of reputation changes
-- **REST API**: Fully documented OpenAPI interface
+## 🚀 Installation Rapide (Windows 11)
 
-## 🚀 Quick Start
+### Prérequis
 
-### Prerequisites
+1. **Docker Desktop** pour Windows avec WSL2 activé
+   - Télécharger: https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe
+   - Activer WSL2 lors de l'installation
 
-- Docker & Docker Compose installed
-- No need to install Rust, PostgreSQL, Redis, or any other dependencies!
+2. **Git for Windows**
+   - Télécharger: https://gitforwindows.org/
 
-### Installation
+### Étapes d'Installation
 
-```bash
-# Clone the repository
-git clone https://github.com/your-user/m-eye.git
+```powershell
+# 1. Cloner le projet
+git clone https://github.com/votre-org/m-eye.git
 cd m-eye
 
-# Run the installation script
-./install.sh
-```
-
-Or manually:
-
-```bash
+# 2. Copier le fichier d'environnement
 cp .env.example .env
+
+# 3. Éditer .env et changer JWT_SECRET (IMPORTANT!)
+# Utilisez un générateur de mot de passe sécurisé
+
+# 4. Lancer l'application
 docker compose up -d
+
+# 5. Vérifier les logs
+docker compose logs -f app
 ```
 
-### Access
+### Accès à l'Application
 
-- **Web Interface**: http://localhost:3000
-- **API**: http://localhost:8000
-- **API Documentation**: http://localhost:8000/docs
-- **SMTP Gateway**: localhost:2525
+- **🌐 API**: http://localhost:3000
+- **📚 Documentation API**: http://localhost:3000/docs
+- **📧 SMTP Gateway**: localhost:2525
 
-### Default Admin Account
+### Compte Administrateur par Défaut
 
 - **Email**: `admin@m-eye.local`
-- **Password**: `ChangeMe123!`
+- **Mot de passe**: `Admin123!`
 
-⚠️ **Important**: Change the default password immediately!
+> ⚠️ **CHANGEZ LE MOT DE PASSE IMMÉDIATEMENT** après la première connexion !
 
 ## 🏗️ Architecture
 
 ```
                     ┌──────────────┐
-                    │   M'Eye      │
-                    │   Backend    │
-                    │   (Rust)     │
+                    │  M'Eye App   │
+                    │  (Rust/Axum) │
                     └──────┬───────┘
                            │
               ┌────────────┴────────────┐
               │                         │
        ┌──────▼──────┐           ┌──────▼──────┐
        │ PostgreSQL  │           │    Redis    │
-       │  (Source    │           │  (Cache/    │
-       │   of Truth) │           │   Queue)    │
+       │   (Data)    │           │  (Cache)    │
        └─────────────┘           └─────────────┘
 ```
 
-### Components
+### Services Docker
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| Backend API | Rust + Axum | REST API, business logic |
-| SMTP Gateway | Rust | Email parsing, SPF/DKIM/DMARC |
-| Database | PostgreSQL | Source of truth for all data |
-| Cache/Queue | Redis | Caching, rate limiting, async jobs |
-| Frontend | React + TypeScript | Web dashboard (Phase 2) |
+| Service | Port | Description |
+|---------|------|-------------|
+| `app` | 3000, 2525 | API + SMTP Gateway |
+| `db` | 5432 (interne) | PostgreSQL 15 |
+| `redis` | 6379 (interne) | Redis 7 |
 
-## 📊 Reputation Status
+## 📖 Utilisation
 
-| Status | Score | Description |
-|--------|-------|-------------|
-| 🟢 SAFE | 0-20 | Trusted identity |
-| ⚪ UNKNOWN | 21-40 | Insufficient information |
-| 🟠 WATCH | 41-60 | Suspicious, monitor closely |
-| 🔴 BLOCKED | 61-80 | Confirmed malicious |
-| 🟣 COMPROMISED | 81-100 | Compromised or associated with breach |
-
-## 🔌 API Examples
-
-### Check Email Reputation
+### Vérifier une Réputation
 
 ```bash
-curl http://localhost:8000/api/v1/reputation/email/phishing@example.com
+curl http://localhost:3000/api/v1/reputation/email/phishing@example.com
 ```
 
-### Submit a Report
+### Soumettre un Signalement
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/reports \
-  -H "Authorization: Bearer YOUR_TOKEN" \
+curl -X POST http://localhost:3000/api/v1/reports \
   -H "Content-Type: application/json" \
   -d '{
-    "target": "phishing@example.com",
     "target_type": "email",
-    "category": "phishing",
-    "description": "Suspicious phishing attempt"
+    "target_value": "spam@example.com",
+    "category": "spam",
+    "description": "Campagne de spam détectée"
   }'
 ```
 
-### Get API Documentation
+### Configurer Votre Serveur Mail
 
-Visit http://localhost:8000/docs for interactive Swagger UI.
+Pour utiliser M'Eye comme gateway SMTP, configurez votre serveur mail (Postfix, Exchange, etc.) pour relayer vers `m-eye:2525`.
 
-## 🛡️ Security Principles
+**Exemple Postfix** (`/etc/postfix/main.cf`):
+```bash
+relayhost = [m-eye]:2525
+```
 
-1. **UNKNOWN ≠ MALICIOUS**: Unknown identities are not automatically considered malicious
-2. **Explainable Decisions**: All classifications include reasoning
-3. **Audit Trail**: Every decision is logged and traceable
-4. **Evidence-Based**: Reports require evidence, not just opinions
-5. **Minimal Data**: Personal data is minimized
-6. **Rate Limiting**: Protection against abuse
-7. **RBAC**: Principle of least privilege
+## 🔧 Configuration
 
-## 📖 Documentation
+Éditez `.env` pour personnaliser :
 
-- [Architecture](docs/architecture.md)
-- [Installation Guide](docs/installation.md)
-- [API Reference](http://localhost:8000/docs)
-- [Contributing](CONTRIBUTING.md)
-- [Security Policy](SECURITY.md)
-- [Code of Conduct](CODE_OF_CONDUCT.md)
+```bash
+# Database
+POSTGRES_PASSWORD=VotreMotDePasseSecurise!
 
-## 🗺️ Roadmap
+# Security (CRITIQUE: Changez ceci!)
+JWT_SECRET=votre_secret_tres_long_et_aleatoire_ici
 
-### Phase 1 (Current) ✅
-- [x] PostgreSQL schema
-- [x] Redis integration
-- [x] SMTP Gateway
-- [x] Email parser
-- [x] SPF/DKIM/DMARC analysis
+# Risk Thresholds
+RISK_THRESHOLD_BLOCK=60
+```
+
+## 🧪 Tests
+
+```bash
+# Builder et tester
+docker compose build
+docker compose run --rm app cargo test
+
+# Tests spécifiques
+docker compose run --rm app cargo test -p meye-risk
+```
+
+## 📚 Documentation Complète
+
+- [Architecture Détaillée](docs/architecture.md)
+- [Guide d'Installation](docs/installation.md)
+- [API Reference](http://localhost:3000/docs)
+- [Contribuer](CONTRIBUTING.md)
+- [Sécurité](SECURITY.md)
+
+## 🛣️ Roadmap
+
+### Phase 1 (Actuelle) ✅
+- [x] Core API Rust
+- [x] Database Schema
 - [x] Reputation Engine
-- [x] Risk Score (explainable)
-- [x] REST API
-- [x] Authentication (JWT)
-- [x] Basic dashboard
+- [x] Risk Engine
+- [x] SMTP Gateway (basique)
+- [x] Authentification JWT
 
 ### Phase 2
-- [ ] Community reports
-- [ ] Evidence submission
-- [ ] Suggestions system
-- [ ] Moderation workflow
-- [ ] Full RBAC implementation
-- [ ] React dashboard
+- [ ] Frontend React/TypeScript
+- [ ] Dashboard complet
+- [ ] Gestion des preuves
+- [ ] Modération
+- [ ] RBAC complet
 
 ### Phase 3
 - [ ] OpenSearch integration
 - [ ] Threat Intelligence providers
-- [ ] Researcher dashboard
 - [ ] Advanced analytics
-- [ ] Community reputation
+- [ ] Researcher dashboard
 
 ### Phase 4
 - [ ] Production hardening
-- [ ] Monitoring & alerting
-- [ ] Distributed workers
-- [ ] Advanced threat detection
-- [ ] Federation/community reputation
+- [ ] Monitoring avancé
+- [ ] Workers distribués
+- [ ] Fédération communautaire
 
-## 🧪 Development
+## 🔐 Sécurité
 
-### Run Tests
+Ce projet suit les meilleures pratiques :
+- ✅ Mots de passe hashés avec Argon2id
+- ✅ JWT pour l'authentification
+- ✅ Conteneurs non-root
+- ✅ Validation stricte des entrées
+- ✅ Audit logs complets
+- ✅ Rate limiting
 
-```bash
-cd backend
-cargo test
-```
+**Reportez les vulnérabilités via** [SECURITY.md](SECURITY.md)
 
-### Build from Source
+## 🤝 Contribuer
 
-```bash
-cd backend
-cargo build --release
-```
+Les contributions sont les bienvenues ! Veuillez lire [CONTRIBUTING.md](CONTRIBUTING.md) avant de soumettre une PR.
 
-### View Logs
+## 📄 Licence
 
-```bash
-docker compose logs -f
-```
+Ce projet est sous licence **AGPL-3.0**. Voir [LICENSE](LICENSE) pour plus de détails.
 
-### Stop Services
+## 🙏 Remerciements
 
-```bash
-docker compose down
-```
-
-To remove volumes:
-
-```bash
-docker compose down -v
-```
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-## 📄 License
-
-This project is licensed under the AGPL-3.0 License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-M'Eye is inspired by community-driven security initiatives and the belief that email security should be transparent, collaborative, and accessible to everyone.
+- La communauté Rust pour ses outils exceptionnels
+- Les projets open source de sécurité email qui ont inspiré M'Eye
+- Tous les contributeurs
 
 ---
 
-Built with 🦀 Rust and ❤️ by the M'Eye Team
+**M'Eye** - *See everything, trust nothing.* 👁️

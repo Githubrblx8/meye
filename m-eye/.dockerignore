@@ -1,0 +1,9 @@
+target/
+**/target/
+.env
+*.log
+.gitignore
+.vscode/
+.idea/
+frontend/node_modules/
+frontend/dist/
