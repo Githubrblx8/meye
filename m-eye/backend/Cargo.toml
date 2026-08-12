@@ -1,0 +1,71 @@
+[package]
+name = "m-eye"
+version = "0.1.0"
+edition = "2021"
+description = "Open Source Email Security and Reputation Platform"
+license = "AGPL-3.0"
+
+[dependencies]
+# Web framework
+axum = { version = "0.7", features = ["macros"] }
+tokio = { version = "1", features = ["full"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace", "limit", "validate-content-type"] }
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "postgres", "redis", "uuid", "chrono"] }
+redis = { version = "0.25", features = ["tokio-comp"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Authentication
+jsonwebtoken = "9"
+argon2 = "0.5"
+uuid = { version = "1", features = ["v4", "serde"] }
+base64 = "0.21"
+rand = "0.8"
+
+# Validation
+validator = { version = "0.18", features = ["derive"] }
+
+# Email parsing
+lettre = { version = "0.11", features = ["tokio1-rustls-tls"] }
+mail-parser = "0.10"
+
+# DNS lookups
+trust-dns-resolver = "0.23"
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# OpenAPI
+utoipa = { version = "4", features = ["axum_extras", "uuid", "chrono"] }
+utoipa-swagger-ui = { version = "6", features = ["axum"] }
+
+# Config
+dotenvy = "0.15"
+
+[dev-dependencies]
+mockall = "0.12"
+
+[[bin]]
+name = "m-eye-api"
+path = "src/main.rs"
+
+[[bin]]
+name = "m-eye-worker"
+path = "src/worker.rs"
+
+[profile.release]
+opt-level = 3
+lto = true

@@ -1,0 +1,10 @@
+# M'Eye Frontend - Docker Development
+
+# Install dependencies
+RUN npm install
+
+# Expose Vite dev server port
+EXPOSE 3000
+
+# Start development server with host binding for Docker
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
